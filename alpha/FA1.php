@@ -128,7 +128,8 @@ class FA1{
     }
     private static function Concat($lhs, $rhs){
         $c = self::$c;
-        $ret = self::Copy($lhs);        $retAcceptStatus = self::FindAcceptStatus($ret);
+        $ret = self::Copy($lhs);
+        $retAcceptStatus = self::FindAcceptStatus($ret);
         $rhsCopy = self::Copy($rhs);
         $rhsCopyAcceptStatus = self::FindAcceptStatus($rhsCopy);
         self::ConnectTo($ret, [$rhsCopy]);
