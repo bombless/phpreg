@@ -49,7 +49,7 @@ class FA1{
                 $i = $mapToIndex[$v];
                 $c->SetClosure($pool[$index], $pool[$i]);
             }
-            $c->SetAccept($pool[$i], $c->GetAccept($item));
+            $c->SetAccept($pool[$index], $c->GetAccept($item));
         }
         return $pool[0];
     }
@@ -63,9 +63,8 @@ class FA1{
             $left = self::ConstructSingleTransitionFA($str);
             if($left < 0)return -1;
             if(substr($str, 1, 1) == '*'){
+                $left = self::Kleene($left);
                 $right = self::Constructor(substr($str, 2));
-                if($right < 0)return -1;
-                $right = self::Kleene($right);
             }else{
                 $right = self::Constructor(substr($str, 1));
             }
@@ -113,7 +112,7 @@ class FA1{
         $add = false;
         $ret = [];
         foreach($c->GetClosure($lhs) as $item){
-            if(!in_array($lhs, $acc)){
+            if(!in_array($item, $acc)){
                 $ret[] = $item;
                 $acc[] = $item;
                 $add = true;
@@ -129,12 +128,11 @@ class FA1{
     }
     private static function Concat($lhs, $rhs){
         $c = self::$c;
-        $ret = self::Copy($lhs);
-        $retAcceptStatus = self::FindAcceptStatus($ret);
+        $ret = self::Copy($lhs);        $retAcceptStatus = self::FindAcceptStatus($ret);
         $rhsCopy = self::Copy($rhs);
         $rhsCopyAcceptStatus = self::FindAcceptStatus($rhsCopy);
         self::ConnectTo($ret, [$rhsCopy]);
-        $c->SetAccept($ret, false);
+        $c->SetAccept($retAcceptStatus, false);
         return $ret;
     }
     private static function Pipe($lhs, $rhs){
@@ -179,24 +177,26 @@ class FA1{
     public function Test($str){
         $c = self::$c;
         if($this->s0 < 0)throw new Exception("RE syntax error");
-        $p = $waitForAttach = [];
-        $p[] = $this->s0;
+        $p = [$this->s0];
+        $waitForAttach = self::GetClosures($this->s0);
         for(; strlen($str) > 0; $str = substr($str, 1)){
             $p = array_merge($p, $waitForAttach);
             $waitForAttach = [];
-            foreach($p as $i => $item){
+            for($i = 0; $i < count($p); ++$i){
+                $item = $p[$i];
                 $map = $c->GetMap($item);
                 if(array_key_exists($str[0], $map)){
                     $p[$i] = $map[$str[0]];
-                    $waitForAttach = array_merge(
-                        $waitForAttach, self::GetClosures($p[$i]));
-                    continue;
+                    foreach(self::GetClosures($p[$i]) as $v){
+                        $waitForAttach[] = $v;
+                    }
                 }else{
-                    if(count($p) == 0)return false;
-                    $remainder = $p[0];
-                    $p[$i] = $remainder;
-                    array_shift($p);
-                    continue;
+                    if(count($p) == 1)return false;
+                    for($j = $i; $j < count($p) - 1; ++$j){
+                        $p[$j] = $p[$j + 1];
+                    }
+                    $i -= 1;
+                    array_pop($p);
                 }
             }
         }
