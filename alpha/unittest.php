@@ -1,5 +1,6 @@
 <?php
 require_once('FA1.php');
+require_once('FA2.php');
 function expect($expr, $ex, $ac){
     if(!$expr)$expr = '<Empty String>';
     $ex = $ex? 'true': 'false';
@@ -12,17 +13,17 @@ function expect($expr, $ex, $ac){
     }
     return $ex == $ac;
 }
-function test($re, $ex){
+function test($fa, $re, $ex){
     echo '#tesing RE /' . $re . "/\n";
-    $re = new FA1($re);
     foreach(func_get_args() as $i => $str){
-        if($i < 2)continue;
-        expect($str, $ex, $re->Test($str));
+        if($i < 3)continue;
+        expect($str, $ex, $fa->Test($str));
     }
 }
-function test_exception($re, $func){
-    $fa = new FA1($re);
-    foreach(func_get_args() as $str){
+function test_exception($fa, $re){
+    echo '#tesing RE /' . $re . "/\n";
+    foreach(func_get_args() as $i => $str){
+        if($i < 2)continue;
         try{
             $fa->Test($str);
         }catch(Exception $e){
@@ -32,46 +33,91 @@ function test_exception($re, $func){
         echo "!!error: expected exception was not caught\n";
     }
 }
-        
-test("", true, "");
-test("", false, "a");
-test("a", true, "a");
-test("a", false, "b", "abc", "");
-test("ab", true, "ab");
-test("ab", false, "", "a", "b", "c");
-test("a|b", true, "a", "b");
-test("a|b", false, "abc", "ab", "");
-test("ab|c", true, "ab", "c");
-test("ab|c", false, "a", "b", "abc");
-test("ab|a", true, "ab", "a");
-test("ab|a", false, "b", "c", "abc");
-test("a|bc", true, "a", "bc");
-test("a|bc", false, "ab", "c", "");
-test("a*", true, "", "a", "aaa");
-test("a*", false, "b", "ab", "ba", "aaaab");
-test("ab*", true, "a", "abb");
-test("ab*", false, "b", "bb", "bc", "abc", "");
-test("a*b", true, "b", "aaab", "ab");
-test("a*b", false, "aa", "ac", "");
-test("a*ab", true, "ab", "aab", "aaaab");
-test("a*ab", false, "a", "b", "c");
-test("aa*b", true, "ab", "aab", "aaaab");
-test("aa*b", false, "a", "b", "c");
-test("a*|b", true, "aaa", "b", "");
-test("a*|b", false, "abc", "ba", "cb", "ab");
-test("a|b*", true, "a", "bb", "");
-test("a|b*", false, "aa", "ab", "bc");
-test("a|b|c", true, "a", "b", "c");
-test("a|b|c", false, "ab", "d", "");
-test("a|", true, "a", "");
-test("a|", false, "b", "aa");
-test("|a", true, "a", "");
-test("|a", false, "b");
-test("||", true, "");
-test("||", false, "a");
-test_exception("*", "", "a", "b");
-test_exception("|*", "", "a", "b");
-test_exception("**", "", "a", "b");
-test_exception("*|*", "", "a", "b");
-test_exception("*||*", "", "a", "b");
-test_exception("||*", "", "a", "b");
+
+test(\FA1\RE(""), "", true, "");
+test(\FA1\RE(""), "", false, "a");
+test(\FA1\RE("a"), "a", true, "a");
+test(\FA1\RE("a"), "a", false, "b", "abc", "");
+test(\FA1\RE("ab"), "ab", true, "ab");
+test(\FA1\RE("ab"), "ab", false, "", "a", "b", "c");
+test(\FA1\RE("a|b"), "a|b", true, "a", "b");
+test(\FA1\RE("a|b"), "a|b", false, "abc", "ab", "");
+test(\FA1\RE("ab|c"), "ab|c", true, "ab", "c");
+test(\FA1\RE("ab|c"), "ab|c", false, "a", "b", "abc");
+test(\FA1\RE("ab|a"), "ab|a", true, "ab", "a");
+test(\FA1\RE("ab|a"), "ab|a", false, "b", "c", "abc");
+test(\FA1\RE("a|bc"), "a|bc", true, "a", "bc");
+test(\FA1\RE("a|bc"), "a|bc", false, "ab", "c", "");
+test(\FA1\RE("a*"), "a*", true, "", "a", "aaa");
+test(\FA1\RE("a*"), "a*", false, "b", "ab", "ba", "aaaab");
+test(\FA1\RE("ab*"), "ab*", true, "a", "abb");
+test(\FA1\RE("ab*"), "ab*", false, "b", "bb", "bc", "abc", "");
+test(\FA1\RE("a*b"), "a*b", true, "b", "aaab", "ab");
+test(\FA1\RE("a*b"), "a*b", false, "aa", "ac", "");
+test(\FA1\RE("a*ab"), "a*ab", true, "ab", "aab", "aaaab");
+test(\FA1\RE("a*ab"), "a*ab", false, "a", "b", "c");
+test(\FA1\RE("aa*b"), "aa*b", true, "ab", "aab", "aaaab");
+test(\FA1\RE("aa*b"), "aa*b", false, "a", "b", "c");
+test(\FA1\RE("a*|b"), "a*|b", true, "aaa", "b", "");
+test(\FA1\RE("a*|b"), "a*|b", false, "abc", "ba", "cb", "ab");
+test(\FA1\RE("a|b*"), "a|b*", true, "a", "bb", "");
+test(\FA1\RE("a|b*"), "a|b*", false, "aa", "ab", "bc");
+test(\FA1\RE("a|b|c"), "a|b|c", true, "a", "b", "c");
+test(\FA1\RE("a|b|c"), "a|b|c", false, "ab", "d", "");
+test(\FA1\RE("a|"), "a|", true, "a", "");
+test(\FA1\RE("a|"), "a|", false, "b", "aa");
+test(\FA1\RE("|a"), "|a", true, "a", "");
+test(\FA1\RE("|a"), "|a", false, "b");
+test(\FA1\RE("||"), "||", true, "");
+test(\FA1\RE("||"), "||", false, "a");
+test_exception(\FA1\RE("*"), "*", "", "a", "b");
+test_exception(\FA1\RE("|*"), "|*", "", "a", "b");
+test_exception(\FA1\RE("**"), "**", "", "a", "b");
+test_exception(\FA1\RE("*|*"), "*|*", "", "a", "b");
+test_exception(\FA1\RE("*||*"), "*||*", "", "a", "b");
+test_exception(\FA1\RE("||*"), "||*", "", "a", "b");
+
+
+
+test(\FA2\RE(""), "", true, "");
+test(\FA2\RE(""), "", false, "a");
+test(\FA2\RE("a"), "a", true, "a");
+test(\FA2\RE("a"), "a", false, "b", "abc", "");
+test(\FA2\RE("ab"), "ab", true, "ab");
+test(\FA2\RE("ab"), "ab", false, "", "a", "b", "c");
+test(\FA2\RE("a|b"), "a|b", true, "a", "b");
+test(\FA2\RE("a|b"), "a|b", false, "abc", "ab", "");
+test(\FA2\RE("ab|c"), "ab|c", true, "ab", "c");
+test(\FA2\RE("ab|c"), "ab|c", false, "a", "b", "abc");
+test(\FA2\RE("ab|a"), "ab|a", true, "ab", "a");
+test(\FA2\RE("ab|a"), "ab|a", false, "b", "c", "abc");
+test(\FA2\RE("a|bc"), "a|bc", true, "a", "bc");
+test(\FA2\RE("a|bc"), "a|bc", false, "ab", "c", "");
+test(\FA2\RE("a*"), "a*", true, "", "a", "aaa");
+test(\FA2\RE("a*"), "a*", false, "b", "ab", "ba", "aaaab");
+test(\FA2\RE("ab*"), "ab*", true, "a", "abb");
+test(\FA2\RE("ab*"), "ab*", false, "b", "bb", "bc", "abc", "");
+test(\FA2\RE("a*b"), "a*b", true, "b", "aaab", "ab");
+test(\FA2\RE("a*b"), "a*b", false, "aa", "ac", "");
+test(\FA2\RE("a*ab"), "a*ab", true, "ab", "aab", "aaaab");
+test(\FA2\RE("a*ab"), "a*ab", false, "a", "b", "c");
+test(\FA2\RE("aa*b"), "aa*b", true, "ab", "aab", "aaaab");
+test(\FA2\RE("aa*b"), "aa*b", false, "a", "b", "c");
+test(\FA2\RE("a*|b"), "a*|b", true, "aaa", "b", "");
+test(\FA2\RE("a*|b"), "a*|b", false, "abc", "ba", "cb", "ab");
+test(\FA2\RE("a|b*"), "a|b*", true, "a", "bb", "");
+test(\FA2\RE("a|b*"), "a|b*", false, "aa", "ab", "bc");
+test(\FA2\RE("a|b|c"), "a|b|c", true, "a", "b", "c");
+test(\FA2\RE("a|b|c"), "a|b|c", false, "ab", "d", "");
+test(\FA2\RE("a|"), "a|", true, "a", "");
+test(\FA2\RE("a|"), "a|", false, "b", "aa");
+test(\FA2\RE("|a"), "|a", true, "a", "");
+test(\FA2\RE("|a"), "|a", false, "b");
+test(\FA2\RE("||"), "||", true, "");
+test(\FA2\RE("||"), "||", false, "a");
+test_exception(\FA2\RE("*"), "*", "", "a", "b");
+test_exception(\FA2\RE("|*"), "|*", "", "a", "b");
+test_exception(\FA2\RE("**"), "**", "", "a", "b");
+test_exception(\FA2\RE("*|*"), "*|*", "", "a", "b");
+test_exception(\FA2\RE("*||*"), "*||*", "", "a", "b");
+test_exception(\FA2\RE("||*"), "||*", "", "a", "b");
