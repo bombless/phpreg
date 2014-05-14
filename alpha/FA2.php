@@ -144,7 +144,7 @@ namespace FA2{
             $accept = $this->s0->GetAccept();
             $pool = $this->s0->GetPool();
             $p = [0];
-            $attach = $this->GetClosures(0);if(is_object($str)){var_dump($str); die;}
+            $attach = $this->GetClosures(0);
             for(; strlen($str) > 0; $str = substr($str, 1)){
                 $chr = $str[0];
                 $p = array_merge($p, $attach);
@@ -153,7 +153,7 @@ namespace FA2{
                     $item = $pool[$p[$i]];
                     if(array_key_exists($chr, $item->map)){
                         $p[$i] = $item->map[$chr];
-                        $attach = $this->GetClosures($p[$i]);
+                        $attach = array_merge($attach, $this->GetClosures($p[$i]));
                     }else{
                         for($j = $i + 1; $j < count($p); ++$j){
                             $p[$j - 1] = $p[$j];
